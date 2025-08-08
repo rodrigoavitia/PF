@@ -1,30 +1,38 @@
 from conexionBD_llantas import *
 
-def agregar_llanta(marca, categoria, medida, estado, precio, cantidad):
+def agregar_llanta(usuario_id, marca, categoria, medida, estado, precio, cantidad):
     try:
-        cursor = conexion.cursor()
-        cursor.execute(
-            "INSERT INTO llantas (marca, categoria, medida, estado, precio, cantidad) VALUES (%s, %s, %s, %s, %s, %s)",
-            (marca, categoria, medida, estado, precio, cantidad)
-        )
+        cursor.execute("""
+            INSERT INTO llantas (usuario_id, marca, categoria, medida, estado, precio, cantidad)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (usuario_id, marca, categoria, medida, estado, precio, cantidad))
         conexion.commit()
-        cursor.close()
         return True
     except Exception as e:
-        print(f"Error al agregar llanta: {e}")
+        print("Error al agregar llanta:", e)
         return False
-    
-def mostrar_llantas():
-    try:
-        cursor = conexion.cursor()
-        cursor.execute("SELECT * FROM llantas")
-        llantas = cursor.fetchall()
-        cursor.close()
-        return llantas
-    except Exception as e:
-        print(f"Error al mostrar llantas: {e}")
-    return []
-        
 
-    # AQUI EN LLANTAS.py LO QUE ESCRIBIMOS ES LO QUE COMUNICAMOS CON LA BASE DE DATOS, NO LO QUE HARA EL CODIGO EN LA TERMINAL, PUEDES CORROBORAR
-    # EN NOTAS.PY DEL PROFE DAGOBERTO
+def mostrar_llantas(usuario_id):
+    try:
+        cursor.execute("SELECT * FROM llantas WHERE usuario_id = %s", (usuario_id,))
+        return cursor.fetchall()
+    except Exception as e:
+        print("Error al mostrar llantas:", e)
+        return []
+
+def buscar_llanta(usuario_id, marca):
+    try:
+        cursor.execute("SELECT * FROM llantas WHERE usuario_id = %s AND marca LIKE %s", (usuario_id, "%" + marca + "%"))
+        return cursor.fetchall()
+    except Exception as e:
+        print("Error al buscar llantas:", e)
+        return []
+
+def eliminar_llanta(usuario_id, llanta_id):
+    try:
+        cursor.execute("DELETE FROM llantas WHERE usuario_id = %s AND id = %s", (usuario_id, llanta_id))
+        conexion.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print("Error al eliminar llanta:", e)
+        return False
